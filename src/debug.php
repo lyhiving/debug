@@ -160,6 +160,7 @@ class debug
         }
         $this->_logs = [];
         $this->_logs_buffer = '';
+        $str .= "------------------".PHP_EOL.PHP_EOL;
         file_put_contents($filename, $str, FILE_APPEND);
     }
 
