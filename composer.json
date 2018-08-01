@@ -1,0 +1,22 @@
+{
+  "name": "lyhiving/debug",
+  "description": "PHP debug",
+  "keywords": ["debug","Easy PHP Debug"],
+  "homepage": "https://github.com/lyhiving/debug",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "lyhiving",
+      "email": "lyhiving@gmail.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=5.4",
+    "ext-gd": "*"
+  },
+  "autoload": {
+    "psr-4": { "lyhiving\\debug\\": "src/" }
+  },
+  "minimum-stability": "dev"
+}
