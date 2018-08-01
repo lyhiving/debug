@@ -82,6 +82,6 @@ $debug->dump('MAKE A BETTER WORLD');
 $debug->_dump('OK. I\'m the last line.');
 ```
 
-更多用法参考 example里面的范例。
+更多用法参考 [examples](https://github.com/lyhiving/debug/blob/master/examples/index.php) 里面的范例。
 
 本文件大部分来自 [@dreamxyp](https://github.com/dreamxyp)  我做了composer的适应和部分冗余处理。
