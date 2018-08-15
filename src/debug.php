@@ -71,6 +71,16 @@ class debug
         return $this;
     }
 
+
+    /**
+     * 设置文件路径
+     */
+    public function file($filename)
+    {
+        $this->_filename = $filename;
+        return $this;
+    }
+
     /**
      * 调试日志
      * @param string $k

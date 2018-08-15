@@ -14,3 +14,5 @@ $debug->log('MAC','MAKE A BETTER WORLD');
 
 $debug->dump('MAKE A BETTER WORLD');
 $debug->_dump('OK. I\'m the last line.');
+
+// $debug->file(__DIR__.'/new.txt')
