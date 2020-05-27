@@ -101,11 +101,11 @@ class debug
 
     /**
      * 调试日志
-     * @param string $k
+     * @param mixed  $k
      * @param mixed  $log          日志内容
      * @param bool   $is_replace   是否替换
      */
-    public function log(string $k, $log, $is_replace = true)
+    public function log($k, $log='', $is_replace = true)
     {
         $this->console($log, $k);
         if ($k && $log) {
@@ -212,7 +212,7 @@ class debug
             $t = [];
             foreach ($_GET as $k => $v) {
                 if (is_array($v)) {
-                    $t[] = "'{$k}' => '" . json_encode($v, JSON_UNESCAPED_UNICODE) . "'";
+                    $t[] = "{@$k} => {" . json_encode($v, JSON_UNESCAPED_UNICODE) . "}";
                 } else {
                     $t[] = "{$k} => {$v}";
                 }
