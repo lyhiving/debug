@@ -5,6 +5,14 @@ class debug
 {
     /** 日志数组 */
     private $_logs = [];
+
+    private $_iscli = 0;
+    
+    /** log级别 */
+    private $_log_level = 1;
+
+    private $_debug_pre;
+
     private $_logs_buffer = '';
 
     /** header idx */
@@ -48,8 +56,11 @@ class debug
      */
     public function __construct($filename = 'debug.txt', $buffer = true, $get = true, $post = true, $cookie = true, $session = true, $url = true, $server = false)
     {
-        ob_start();
-        register_shutdown_function(array($this, 'callback'));
+        $this->_iscli = $this->is_cli();
+        if (!$this->_iscli) {
+            ob_start();
+            register_shutdown_function(array($this, 'callback'));
+        }
         $this->_filename = $filename;
         $this->_buffer = $buffer;
         $this->_get = $get;
@@ -62,6 +73,14 @@ class debug
     }
 
     /**
+     * 判断是否在命令行模式
+     */
+    public function is_cli()
+    {
+        return preg_match("/cli/i", php_sapi_name()) ? 1 : 0;
+    }
+
+    /**
      * 通过配置单独定义函数的配置
      */
     public function set($k, $v)
@@ -70,7 +89,6 @@ class debug
         $this->$_k = $v;
         return $this;
     }
-
 
     /**
      * 设置文件路径
@@ -89,6 +107,7 @@ class debug
      */
     public function log(string $k, $log, $is_replace = true)
     {
+        $this->console($log, $k);
         if ($k && $log) {
             // 直接替换
             if ($is_replace) {
@@ -128,6 +147,56 @@ class debug
         exit($buffer);
     }
 
+    /**
+     * 直接命令行记录LOG, 比较多信息
+     */
+    public function console_log($var, $label = null, $echo = true)
+    {
+
+        $debug = $this->_debug_pre && is_array($this->_debug_pre) ? $this->_debug_pre : debug_backtrace();
+        $str = '[DEBUG]:' . date(' Y-m-d H:i:s ') . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ")" . PHP_EOL;
+        if (is_string($var)) {
+            $str .= ($label ? '\''.$label . '\' =>\'' :'') . $var.($label ? '\',' :'') . PHP_EOL;
+        } else {
+            $str .= ($label ? '\''.$label . '\' =>' :'') . json_encode($var, JSON_UNESCAPED_UNICODE)  .($label ? ',' :''). PHP_EOL;
+        }
+        if (!$this->_filename) {
+            if ($echo) {
+                echo $str;
+            }
+            return;
+        }
+        file_put_contents($this->_filename, $str, FILE_APPEND);
+    }
+
+    /**
+     * 直接命令行输出
+     */
+    public function console_info($var, $label = null, $echo = true)
+    {
+        if (is_string($var)) {
+            $str .= ($label ? '\''.$label . '\' =>\'' :'') . $var.($label ? '\',' :'') . PHP_EOL;
+        } else {
+            $str .= ($label ? '\''.$label . '\' =>' :'') . var_export($var, true)  .($label ? ',' :''). PHP_EOL;
+        }
+        if (!$this->_filename) {
+            if ($echo) {
+                echo $str;
+            }
+            return;
+        }
+        file_put_contents($this->_filename, $str, FILE_APPEND);
+    }
+
+        /**
+     * 直接命令行输出
+     */
+    public function console($var, $label = null)
+    {
+        $this->_log_level ? $this->console_log($var, $label, !$this->buffer) : $this->console_info($var, $label, !$this->buffer);
+    }
+
+
     /** 析构调试相关 */
     public function write()
     {
@@ -143,7 +212,7 @@ class debug
             $t = [];
             foreach ($_GET as $k => $v) {
                 if (is_array($v)) {
-                    $t[] = "{@$k} => {" . json_encode($v) . "}";
+                    $t[] = "'{$k}' => '" . json_encode($v, JSON_UNESCAPED_UNICODE) . "'";
                 } else {
                     $t[] = "{$k} => {$v}";
                 }
@@ -170,7 +239,7 @@ class debug
         }
         $this->_logs = [];
         $this->_logs_buffer = '';
-        $str .= "------------------".PHP_EOL.PHP_EOL;
+        $str .= "------------------" . PHP_EOL . PHP_EOL;
         file_put_contents($filename, $str, FILE_APPEND);
     }
 
@@ -218,8 +287,11 @@ class debug
      */
     public function dump($var, $label = null, $strict = true, $echo = true)
     {
+        if($this->_iscli){
+            return $this->console($var, $label);
+        }
         $label = ($label === null) ? '' : rtrim($label) . ' ';
-        $debug = debug_backtrace();
+        $debug = $this->_debug_pre && is_array($this->_debug_pre) ? $this->_debug_pre : debug_backtrace();
         $mtime = explode(' ', microtime());
         $ntime = microtime(true);
         $_ENV['dumpOrderID'] = isset($_ENV['dumpOrderID']) && $_ENV['dumpOrderID'] ? $_ENV['dumpOrderID'] + 1 : 1;
@@ -228,7 +300,7 @@ class debug
             $_ENV['dumpTimeCountDown'] = $ntime;
         }
 
-        $message = '<br /><font color="#fff" style="width: 30px;height: 12px; line-height: 12px;background-color:' . ($label ? 'indianred' : '#2943b3') . ';padding: 2px 6px;border-radius: 4px;">No. ' . sprintf('%02d', $_ENV['dumpOrderID']) . '</font>&nbsp;&nbsp;' . " ~" . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ") &nbsp;" . date('Y/m/d H:i:s') . " $mtime[0] " . (!$offtime ? "" : "(" . $offtime . "ms)") . '<br />' . PHP_EOL;
+        $message = '<br /><font color="#fff" style="width: 30px;height: 12px; line-height: 12px;background-color:' . ($label ? 'indianred' : '#2943b3') . ';padding: 2px 6px;border-radius: 4px;">No. ' . sprintf('%02d', $_ENV['dumpOrderID']) . '</font>&nbsp;&nbsp;' . " ~" . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ") &nbsp;" . date('Y-m-d H:i:s') . " $mtime[0] " . (!$offtime ? "" : "(" . $offtime . "ms)") . '<br />' . PHP_EOL;
         if (!$strict) {
             if (ini_get('html_errors')) {
                 $output = print_r($var, true);
@@ -256,7 +328,9 @@ class debug
 
     public function _dump($var, $label = null, $strict = true, $echo = true)
     {
-        self::dump($var, $label, $strict, $echo);
+        $debug = debug_backtrace();
+        $this->_debug_pre = $debug;
+        $this->dump($var, $label, $strict, $echo);
         exit;
     }
 }

@@ -10,6 +10,8 @@
 
 3、提供dump、_dump两个常规函数以便日常调试。
 
+4、增加命令行的支持
+
 
 ## 少啰嗦，先看东西
 
@@ -19,6 +21,8 @@
 
 ![web调试用](https://raw.githubusercontent.com/lyhiving/debug/master/examples/image/3.png)
 
+![命令行调试用](https://raw.githubusercontent.com/lyhiving/debug/master/examples/image/4.png)
+
 ## 安装
 
 使用 Composer
@@ -26,14 +30,14 @@
 ```json
 {
     "require": {
-            "lyhiving/debug": "1.*"
+            "lyhiving/debug": "2.*"
     }
 }
 ```
 
 ## 用法
 
-普通青年：
+### 普通青年：
 
 直接输出到当前目录下的debug.txt（其实你可以指定到任意可以写的位置）。
 
@@ -41,10 +45,10 @@
 <?php
 use lyhiving\debug\debug;
 
-$debug = new debug(__DIR__.'/debug.txt');
+$debug = new debug(__DIR__."/debug.txt");
 ```
 
-文艺青年：
+### 文艺青年：
 
 加点GET、POST、使用log方法之类。
 
@@ -64,12 +68,11 @@ $debug->log('MAC','MAKE A BETTER WORLD');
 ```
 
 
-闷骚青年：
+### 闷骚青年：
 
 在页面直接调用dump或者_dump的, 其实这个一般是面向web的，所以一般不定义输出文件路径。
 
 其中IA_ROOT常量可以不定义，这样你可以看到完整的路径。如果你正在使用微擎或者微赞，这个常量是自带的。可以帮忙隐藏网站的真实路径。不过都在调试了，还怕什么~~~
-
 
 ```php
 <?php
@@ -95,6 +98,42 @@ $debug->file(__DIR__.'/new.txt')->dump('MAKE A BETTER WORLD');
 $debug->_dump('OK. I\'m the last line.');
 ```
 
-更多用法参考 [examples](https://github.com/lyhiving/debug/blob/master/examples/index.php) 里面的范例。
+更多用法参考 [examples/index.php](https://github.com/lyhiving/debug/blob/master/examples/index.php) 范例。
 
-本文件大部分来自 [@dreamxyp](https://github.com/ounun-php/ounun) , 我做了composer的适应和部分冗余处理。
+
+### 习惯用命令行的中年大叔：
+
+常用办法没变，增加log_level使得可以根据需要使用，在某种程度而言，对于命令行开发会有比较好的输出控制。
+```php
+//简单模式，需额外设置
+$debug->set('log_level',0);
+//默认为1，也可以随时设置回来
+$debug->set('log_level',1);
+```
+在简单模式的情况下，输出的log直接可以复制使用，方便调试。
+
+
+在全局范围内，允许用file的方法重新设置日志路径:
+
+```php
+<?php
+
+use lyhiving\debug\debug;
+define('IA_ROOT', dirname(__DIR__));
+
+$debug = new debug(__DIR__."/#debug.txt");
+$debug->log('MAC', 'MAKE A BETTER WORLD');
+$debug->log('ArrayNormal', array('apple', 'orange', 'banner'));
+//Set less log info
+$debug->set('log_level',0);
+//If you want less infomation
+$debug->log('ArrayCanCopyDirect', array('apple', 'orange', 'banner'));
+$debug->dump('MAKE A BETTER WORLD');
+$debug->_dump('OK. I\'m the last line.');
+
+```
+
+其中IA_ROOT常量可以不定义，这样你可以看到完整的路径。如果你正在使用微擎或者微赞，这个常量是自带的。可以帮忙隐藏网站的真实路径。不过都在调试了，还怕什么~~~
+
+
+本文件部分来自 [@dreamxyp](https://github.com/ounun-php/ounun) , 我做了composer的适应、命令行兼容和部分冗余处理。
