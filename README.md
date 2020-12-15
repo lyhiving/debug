@@ -27,6 +27,10 @@
 
 使用 Composer
 
+```bash
+composer require lyhiving/debug
+```
+
 ```json
 {
     "require": {
