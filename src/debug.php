@@ -61,6 +61,9 @@ class debug
     /**记录毫秒时间 */
     private $_log_microtime = false;
 
+    /**记录时一并echo */
+    private $_log_and_echo = false;
+
     /**记录开始执行的时间 */
     private $_start_microtime;
     /**
@@ -257,20 +260,21 @@ class debug
      */
     public function console_log($var, $label = null, $echo = true)
     {
-
         $debug = $this->_debug_pre && is_array($this->_debug_pre) ? $this->_debug_pre : debug_backtrace();
+        $echostr = '';
         $str = '[DEBUG]:' . $this->log_time() . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ")" . PHP_EOL;
-        $str .= '[TIMED]: ' . $this->timeoffset() .' ms'. PHP_EOL;
+        $str .= $echostr = '[TIMED]: ' . $this->timeoffset() . ' ms' . PHP_EOL;
         if (is_string($var)) {
-            $str .= ($label ? '\'' . $label . '\' =>\'' : '') . $var . ($label ? '\',' : '') . PHP_EOL;
+            $str .= $echostr .= ($label ? '\'' . $label . '\' =>\'' : '') . $var . ($label ? '\',' : '') . PHP_EOL;
         } else {
             $str .= ($label ? '\'' . $label . '\' =>' : '') . json_encode($var, JSON_UNESCAPED_UNICODE) . ($label ? ',' : '') . PHP_EOL;
+            $echostr .= ($label ? '\'' . $label . '\' =>' : '') . var_export($var, true) . ($label ? ',' : '') . PHP_EOL;
         }
-        if (!$this->_filename) {
+        if (!$this->_filename || $this->_log_and_echo) {
             if ($echo) {
-                echo $str;
+                echo $echostr;
             }
-            return;
+            if(!$this->_log_and_echo) return;
         }
         file_put_contents($this->_filename, $str, FILE_APPEND);
     }
@@ -285,11 +289,11 @@ class debug
         } else {
             $str .= ($label ? '\'' . $label . '\' =>' : '') . var_export($var, true) . ($label ? ',' : '') . PHP_EOL;
         }
-        if (!$this->_filename) {
+        if (!$this->_filename || $this->_log_and_echo) {
             if ($echo) {
                 echo $str;
             }
-            return;
+            if(!$this->_log_and_echo) return;
         }
         file_put_contents($this->_filename, $str, FILE_APPEND);
     }
@@ -317,7 +321,7 @@ class debug
         }
         $filename = $this->_filename;
         $str = '[DEBUG]:' . $this->log_time() . PHP_EOL;
-        $str .= '[TIMED]: ' . $this->timeoffset() .' ms'. PHP_EOL;
+        $str .= '[TIMED]: ' . $this->timeoffset() . ' ms' . PHP_EOL;
         if ($this->_iscli) {
             $str .= '[MODE]: CLI' . PHP_EOL;
             $str .= 'ARGV    : ' . var_export($this->_argv, true) . PHP_EOL;
