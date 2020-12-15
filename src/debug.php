@@ -58,6 +58,11 @@ class debug
     /** 是否捕获异常 catch_exception */
     private $_catch_exception = true;
 
+    /**记录毫秒时间 */
+    private $_log_microtime = false;
+
+    /**记录开始执行的时间 */
+    private $_start_microtime;
     /**
      * 构造函数
      * Debug constructor.
@@ -89,6 +94,7 @@ class debug
             $this->_argv = $argv;
         }
 
+        $this->_start_microtime = microtime(true);
         $this->_filename = $filename;
         $this->_buffer = $buffer;
         $this->_get = $get;
@@ -135,6 +141,7 @@ class debug
      */
     public function log($k, $log = '', $is_replace = true)
     {
+        $this->_debug_pre = debug_backtrace();
         $this->console($log, $k);
         if ($k && $log) {
             // 直接替换
@@ -153,6 +160,7 @@ class debug
                 }
             }
         }
+        return $this;
     }
 
     /** 停止调试 */
@@ -215,7 +223,6 @@ class debug
     /** 内部内调 */
     public function callback()
     {
-        var_dump(__FILE__ . ":" . __LINE__);
         $buffer = ob_get_contents();
         ob_clean();
         ob_implicit_flush(1);
@@ -236,6 +243,15 @@ class debug
         exit($buffer);
     }
 
+    public function log_time()
+    {
+        if ($this->_log_microtime) {
+            return udate(' Y-m-d H:i:s.u ');
+        } else {
+            return date(' Y-m-d H:i:s ');
+        }
+    }
+
     /**
      * 直接命令行记录LOG, 比较多信息
      */
@@ -243,7 +259,8 @@ class debug
     {
 
         $debug = $this->_debug_pre && is_array($this->_debug_pre) ? $this->_debug_pre : debug_backtrace();
-        $str = '[DEBUG]:' . date(' Y-m-d H:i:s ') . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ")" . PHP_EOL;
+        $str = '[DEBUG]:' . $this->log_time() . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ")" . PHP_EOL;
+        $str .= '[TIMED]: ' . $this->timeoffset() .' ms'. PHP_EOL;
         if (is_string($var)) {
             $str .= ($label ? '\'' . $label . '\' =>\'' : '') . $var . ($label ? '\',' : '') . PHP_EOL;
         } else {
@@ -283,6 +300,13 @@ class debug
     public function console($var, $label = null)
     {
         $this->_log_level ? $this->console_log($var, $label, !$this->buffer) : $this->console_info($var, $label, !$this->buffer);
+        return $this;
+    }
+
+    //计算毫秒
+    public function timeoffset()
+    {
+        return (microtime(true) - $this->_start_microtime) * 1000;
     }
 
     /** 析构调试相关 */
@@ -292,7 +316,8 @@ class debug
             return;
         }
         $filename = $this->_filename;
-        $str = '[DEBUG]:' . date("Y-m-d H:i:s") . PHP_EOL;
+        $str = '[DEBUG]:' . $this->log_time() . PHP_EOL;
+        $str .= '[TIMED]: ' . $this->timeoffset() .' ms'. PHP_EOL;
         if ($this->_iscli) {
             $str .= '[MODE]: CLI' . PHP_EOL;
             $str .= 'ARGV    : ' . var_export($this->_argv, true) . PHP_EOL;
@@ -344,6 +369,7 @@ class debug
         $this->_logs_buffer = '';
         $str .= "------------------" . PHP_EOL . PHP_EOL;
         file_put_contents($filename, $str, FILE_APPEND);
+        return $this;
     }
 
     /**
@@ -403,7 +429,7 @@ class debug
             $_ENV['dumpTimeCountDown'] = $ntime;
         }
 
-        $message = '<br /><font color="#fff" style="width: 30px;height: 12px; line-height: 12px;background-color:' . ($label ? 'indianred' : '#2943b3') . ';padding: 2px 6px;border-radius: 4px;">No. ' . sprintf('%02d', $_ENV['dumpOrderID']) . '</font>&nbsp;&nbsp;' . " ~" . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ") &nbsp;" . date('Y-m-d H:i:s') . " $mtime[0] " . (!$offtime ? "" : "(" . $offtime . "ms)") . '<br />' . PHP_EOL;
+        $message = '<br /><font color="#fff" style="width: 30px;height: 12px; line-height: 12px;background-color:' . ($label ? 'indianred' : '#2943b3') . ';padding: 2px 6px;border-radius: 4px;">No. ' . sprintf('%02d', $_ENV['dumpOrderID']) . '</font>&nbsp;&nbsp;' . " ~" . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ") &nbsp;" . $this->log_time() . " $mtime[0] " . (!$offtime ? "" : "(" . $offtime . "ms)") . '<br />' . PHP_EOL;
         if (!$strict) {
             if (ini_get('html_errors')) {
                 $output = print_r($var, true);
