@@ -105,6 +105,7 @@ $debug->_dump('OK. I\'m the last line.');
 更多用法参考 [examples/index.php](https://github.com/lyhiving/debug/blob/master/examples/index.php) 范例。
 
 
+
 ### 习惯用命令行的中年大叔：
 
 常用办法没变，增加log_level使得可以根据需要使用，在某种程度而言，对于命令行开发会有比较好的输出控制。
@@ -115,6 +116,16 @@ $debug->set('log_level',0);
 $debug->set('log_level',1);
 ```
 在简单模式的情况下，输出的log直接可以复制使用，方便调试。
+
+```php
+//开启记录毫秒时间，并且记录同时输出相同内容
+$debug->set('log_microtime', true)->set('log_and_echo', true);
+//开启记录毫秒时间，并且记录详细信息，输出时去掉所在行和执行时间，更接近console_info
+$debug->set('log_microtime', true)->set('log_and_echo', 'timed');
+```
+
+
+
 
 
 在全局范围内，允许用file的方法重新设置日志路径:

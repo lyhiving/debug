@@ -263,7 +263,12 @@ class debug
         $debug = $this->_debug_pre && is_array($this->_debug_pre) ? $this->_debug_pre : debug_backtrace();
         $echostr = '';
         $str = '[DEBUG]:' . $this->log_time() . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ")" . PHP_EOL;
-        $str .= $echostr = '[TIMED]: ' . $this->timeoffset() . ' ms' . PHP_EOL;
+        $timed = '[TIMED]: ' . $this->timeoffset() . ' ms' . PHP_EOL;
+        $str .= $timed;
+   
+        if ($this->_log_and_echo && $this->_log_and_echo === 'timed') {
+            $echostr = $timed;
+        }     
         if (is_string($var)) {
             $str .= $echostr .= ($label ? '\'' . $label . '\' =>\'' : '') . $var . ($label ? '\',' : '') . PHP_EOL;
         } else {
@@ -274,7 +279,10 @@ class debug
             if ($echo) {
                 echo $echostr;
             }
-            if(!$this->_log_and_echo) return;
+            if (!$this->_log_and_echo) {
+                return;
+            }
+
         }
         file_put_contents($this->_filename, $str, FILE_APPEND);
     }
@@ -293,7 +301,10 @@ class debug
             if ($echo) {
                 echo $str;
             }
-            if(!$this->_log_and_echo) return;
+            if (!$this->_log_and_echo) {
+                return;
+            }
+
         }
         file_put_contents($this->_filename, $str, FILE_APPEND);
     }
