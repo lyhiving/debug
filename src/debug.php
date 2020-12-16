@@ -272,8 +272,7 @@ class debug
         if (is_string($var)) {
             $str .= $echostr .= ($label ? '\'' . $label . '\' =>\'' : '') . $var . ($label ? '\',' : '') . PHP_EOL;
         } else {
-            $str .= ($label ? '\'' . $label . '\' =>' : '') . json_encode($var, JSON_UNESCAPED_UNICODE) . ($label ? ',' : '') . PHP_EOL;
-            $echostr .= ($label ? '\'' . $label . '\' =>' : '') . var_export($var, true) . ($label ? ',' : '') . PHP_EOL;
+            $echostr .= $str .= ($label ? '\'' . $label . '\' =>' : '') . var_export($var, true) . ($label ? ',' : '') . PHP_EOL;
         }
         if (!$this->_filename || $this->_log_and_echo) {
             if ($echo) {
