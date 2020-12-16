@@ -64,6 +64,8 @@ class debug
     /**记录时一并echo */
     private $_log_and_echo = false;
 
+    private $_error_level;
+
     /**记录开始执行的时间 */
     private $_start_microtime;
     /**
@@ -78,7 +80,7 @@ class debug
      * @param bool $url      是否输出 url
      * @param bool $server     是否输出 server
      */
-    public function __construct($filename = 'debug.txt', $buffer = true, $get = true, $post = true, $cookie = true, $session = true, $url = true, $server = false, $env = false, $catch_exception = true, $catch_error = true, $error_level = E_ERROR | E_WARNING | E_PARSE)
+    public function __construct($filename = 'debug.txt', $buffer = true, $get = true, $post = true, $cookie = true, $session = true, $url = true, $server = false, $env = false, $catch_exception = false, $catch_error = false, $error_level = E_ERROR | E_WARNING | E_PARSE)
     {
         global $argv;
         $this->_iscli = $this->is_cli();
@@ -104,6 +106,7 @@ class debug
         $this->_session = $session;
         $this->_server = $server;
         $this->_url = $url;
+        $this->_error_level = $error_level;
         $this->_header_idx = 0;
     }
 
@@ -122,6 +125,12 @@ class debug
     {
         $_k = '_' . $k;
         $this->$_k = $v;
+        if ($k == 'catch_error' && $v) {
+            set_error_handler(array($this, 'error_handler'), $this->_error_level);
+        }
+        if ($k == 'catch_exception' && $v) {
+            set_exception_handler(array($this, 'exception_handler'));
+        }
         return $this;
     }
 
@@ -263,10 +272,10 @@ class debug
         $str = '[DEBUG]:' . $this->log_time() . (defined('IA_ROOT') ? substr($debug[0]['file'], strlen(IA_ROOT)) : $debug[0]['file']) . ':(' . $debug[0]['line'] . ")" . PHP_EOL;
         $timed = '[TIMED]: ' . $this->timeoffset() . ' ms' . PHP_EOL;
         $str .= $timed;
-   
+
         if ($this->_log_and_echo && $this->_log_and_echo === 'timed') {
             $echostr = $timed;
-        }     
+        }
         if (is_string($var)) {
             $str .= $echostr .= ($label ? '\'' . $label . '\' =>\'' : '') . $var . ($label ? '\',' : '') . PHP_EOL;
         } else {

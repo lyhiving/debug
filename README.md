@@ -114,6 +114,10 @@ $debug->_dump('OK. I\'m the last line.');
 $debug->set('log_level',0);
 //默认为1，也可以随时设置回来
 $debug->set('log_level',1);
+//接管错误
+$debug->set('catch_error',1);
+//接管异常
+$debug->set('catch_exception',1);
 ```
 在简单模式的情况下，输出的log直接可以复制使用，方便调试。
 
