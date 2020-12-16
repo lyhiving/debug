@@ -83,11 +83,9 @@ class debug
         global $argv;
         $this->_iscli = $this->is_cli();
         if ($catch_error) {
-            var_dump(__LINE__ . ":" . __LINE__);
             set_error_handler(array($this, 'error_handler'), $error_level);
         }
         if ($catch_exception) {
-            var_dump(__LINE__ . ":" . __LINE__);
             set_exception_handler(array($this, 'exception_handler'));
         }
         if (!$this->_iscli) {
