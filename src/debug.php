@@ -184,10 +184,10 @@ class debug
             switch ($errno) {
                 case E_WARNING:
                     // x / 0 错误 PHP7 依然不能很友好的自动捕获 只会产生 E_WARNING 级的错误
-                    // 捕获判断后 throw new DivisionByZeroError($error_msg)
+                    // 捕获判断后 throw new DivisionByZeroError($errstr)
                     // 或者使用 intdiv(x, 0) 方法 会自动抛出 DivisionByZeroError 的错误
-                    if (strcmp('Division by zero', $error_msg) == 0) {
-                        throw new \DivisionByZeroError($error_msg);
+                    if (strcmp('Division by zero', $errstr) == 0) {
+                        throw new \DivisionByZeroError($errstr);
                     }
 
                     $level_tips = 'PHP Warning: ';
