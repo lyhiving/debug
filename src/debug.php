@@ -454,7 +454,7 @@ class debug
         if (!$strict) {
             if (ini_get('html_errors')) {
                 $output = print_r($var, true);
-                $output = "<pre>" . $label . htmlspecialchars($output, ENT_QUOTES, 'utf-8') . "</pre>";
+                $output = "<pre>" . $label . htmlspecialchars($output, ENT_IGNORE, 'utf-8') . "</pre>";
             } else {
                 $output = $label . " : " . print_r($var, true);
             }
@@ -464,7 +464,7 @@ class debug
             $output = ob_get_clean();
             if (!extension_loaded('xdebug')) {
                 $output = preg_replace("/\]\=\>\n(\s+)/m", "] => ", $output);
-                $output = '<pre>' . $label . htmlspecialchars($output, ENT_QUOTES, 'utf-8') . '</pre>';
+                $output = '<pre>' . $label . htmlspecialchars($output, ENT_IGNORE, 'utf-8') . '</pre>';
             }
         }
         $output = $message . $output;
