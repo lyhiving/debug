@@ -69,6 +69,7 @@ $_POST['im'] = 'a POST data';
 $_POST['array'] = array('apple','orange','bananer');
 
 $debug->log('MAC','MAKE A BETTER WORLD');
+$debug->log('TIME','@time');
 ```
 
 

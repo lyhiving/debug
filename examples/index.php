@@ -14,6 +14,7 @@ $debug->set('log_microtime', true)->set('log_and_echo', true);
 //开启记录毫秒时间，并且记录详细信息，输出时去掉所在行和执行时间，更接近console_info
 // $debug->set('log_microtime', true)->set('log_and_echo', 'timed');
 $debug->log('MAC','MAKE A BETTER WORLD');
+$debug->log('TIME','@time');
 $debug->dump('MAKE A BETTER WORLD');
 $debug->_dump('OK. I\'m the last line.');
 
