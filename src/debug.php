@@ -153,9 +153,11 @@ class debug
         $filename = $this->_filename;
         $str = '[DEBUG]:' . date('Y-m-d H:i:s') . PHP_EOL;
         if ($this->_url) {
-            $str .= 'URL    : ' . (isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : '')
-                . '://' . (isset($_SERVER['HTTP_HOST_ORG']) && $_SERVER['HTTP_HOST_ORG'] ? $_SERVER['HTTP_HOST_ORG'] : (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''))
-                . ((isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == 'http' && $_SERVER['SERVER_PORT'] == '80') || (isset($_SERVER['REQUEST_SCHEME']) && $_SERVER['REQUEST_SCHEME'] == 'https' && $_SERVER['SERVER_PORT'] == '443')) ? '' : (isset($_SERVER['SERVER_PORT']) ? ':' . $_SERVER['SERVER_PORT'] : '') . $_SERVER['REQUEST_URI'] . PHP_EOL;
+            $scheme = isset($_SERVER['REQUEST_SCHEME']) ? $_SERVER['REQUEST_SCHEME'] : '';
+            $host = isset($_SERVER['HTTP_HOST_ORG']) && $_SERVER['HTTP_HOST_ORG'] ?$_SERVER['HTTP_HOST_ORG']:(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '');
+            $port = $scheme && isset($_SERVER['SERVER_PORT']) && (($scheme=='http' && $_SERVER['SERVER_PORT']==80)||($scheme=='https' && $_SERVER['SERVER_PORT']==443)) ? '':$_SERVER['SERVER_PORT'];
+            $fullurl= ($scheme ? $scheme.'://':'').$host.($port?':'.$port:'').$_SERVER['REQUEST_URI'];
+            $str .= 'URL    : '.$fullurl.PHP_EOL;
         }
         if ($this->_get && $_GET) {
             $t = [];
