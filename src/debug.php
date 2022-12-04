@@ -197,6 +197,9 @@ class debug
         $this->_logs = [];
         $this->_logs_buffer = '';
         $str .= '------------------' . PHP_EOL . PHP_EOL;
+        if(!is_dir(dirname($filename))){
+            mkdir(dirname($filename), 0755, true);
+        }
         file_put_contents($filename, $str, FILE_APPEND);
     }
 
